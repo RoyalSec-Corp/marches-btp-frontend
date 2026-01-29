@@ -22,7 +22,7 @@ function SignalerLitigeModal({ onClose }) {
           {file && <p className="text-xs text-gray-500 mt-1">Fichier selectionne : {file.name}</p>}
         </div>
         <div className="flex justify-between items-center">
-          <button className="text-sm text-blue-600 hover:underline" onClick={() => alert("Appel de l'assistance...")}>Appeler l'assistance</button>
+          <button className="text-sm text-blue-600 hover:underline" onClick={() => alert("Appel de l'assistance...")}>\ud83d\udcde Appeler l'assistance</button>
           <div className="space-x-2">
             <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200" onClick={onClose}>Annuler</button>
             <button className="px-4 py-2 bg-primary text-white rounded hover:bg-blue-700" onClick={handleSubmit}>Envoyer</button>
