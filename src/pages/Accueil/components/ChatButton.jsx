@@ -20,8 +20,8 @@ function ChatButton() {
   }, []);
 
   useEffect(() => {
-    if (search.trim() === '') setFilteredFaq(faq);
-    else setFilteredFaq(faq.filter(f => f.question.toLowerCase().includes(search.toLowerCase())));
+    if (search.trim() === '') { setFilteredFaq(faq); } 
+    else { setFilteredFaq(faq.filter(f => f.question.toLowerCase().includes(search.toLowerCase()))); }
   }, [search]);
 
   return (
@@ -37,24 +37,15 @@ function ChatButton() {
             <input type="text" placeholder="Rechercher une question..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-100" />
           </div>
           <div className="space-y-2 max-h-40 overflow-y-auto text-sm">
-            {filteredFaq.length > 0 ? filteredFaq.map((item, i) => (
-              <div key={i} className="bg-gray-50 p-2 rounded-lg">
-                <p className="font-medium text-gray-700">{item.question}</p>
-                <p className="text-gray-500 mt-1">{item.answer}</p>
-              </div>
-            )) : <p className="text-gray-500">Aucune question trouvee.</p>}
+            {filteredFaq.length > 0 ? filteredFaq.map((item, i) => (<div key={i} className="bg-gray-50 p-2 rounded-lg"><p className="font-medium text-gray-700">{item.question}</p><p className="text-gray-500 mt-1">{item.answer}</p></div>)) : (<p className="text-gray-500">Aucune question trouvee.</p>)}
           </div>
           <div className="border-t pt-2">
             <p className="text-xs text-gray-500 mb-1">Pas de reponse ? Contactez-nous :</p>
-            <button className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-blue-700 transition">
-              <RiMailSendLine /><span>Envoyer un message</span>
-            </button>
+            <button className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-blue-700 transition"><RiMailSendLine /><span>Envoyer un message</span></button>
           </div>
         </div>
       )}
-      <button onClick={() => setOpen(!open)} className="w-12 h-12 bg-primary text-white rounded-full shadow-lg hover:bg-blue-700 flex items-center justify-center">
-        <RiChatSmile3Line size={22} />
-      </button>
+      <button onClick={() => setOpen(!open)} className="w-12 h-12 bg-primary text-white rounded-full shadow-lg hover:bg-blue-700 flex items-center justify-center"><RiChatSmile3Line size={22} /></button>
     </div>
   );
 }
