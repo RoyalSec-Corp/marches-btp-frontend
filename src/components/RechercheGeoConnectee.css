@@ -1,0 +1,82 @@
+.recherche-geo-container {
+  position: relative;
+  width: 100%;
+}
+
+.recherche-geo-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.recherche-geo-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.recherche-geo-input:focus {
+  outline: none;
+  border-color: #F59E0B;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+.recherche-geo-input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.recherche-geo-loader {
+  position: absolute;
+  right: 12px;
+  color: #999;
+  font-size: 12px;
+}
+
+.recherche-geo-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  padding: 0;
+  list-style: none;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.recherche-geo-suggestion-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+
+.recherche-geo-suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.recherche-geo-suggestion-item:hover {
+  background-color: #FFF7ED;
+}
+
+.recherche-geo-suggestion-item .city-name {
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.recherche-geo-suggestion-item .city-details {
+  font-size: 12px;
+  color: #6B7280;
+}
