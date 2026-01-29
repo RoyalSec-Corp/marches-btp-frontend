@@ -23,7 +23,11 @@ function Header() {
                 <i className="ri-search-line"></i>
               </div>
             </div>
-            <input type="text" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-64 pl-10 p-2.5" placeholder="Rechercher..." />
+            <input
+              type="text"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-64 pl-10 p-2.5"
+              placeholder="Rechercher..."
+            />
           </div>
           <Link to="/connexion" className="text-primary hover:text-primary/80 font-medium whitespace-nowrap">Connexion</Link>
           <Link to="/inscription" className="bg-primary text-white px-4 py-2 rounded-button font-medium hover:bg-primary/90 whitespace-nowrap">Inscription</Link>

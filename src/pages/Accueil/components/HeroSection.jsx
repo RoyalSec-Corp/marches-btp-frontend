@@ -13,7 +13,7 @@ function HeroSection() {
           <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
             <Link to="/inscription-entreprise" className="bg-orange-500 text-white px-6 py-3 rounded-button font-medium hover:bg-orange-600 transition-colors">Entreprise BTP</Link>
             <Link to="/inscription-freelance" className="bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400 text-white px-6 py-3 rounded-button font-medium shadow-md hover:from-blue-800 hover:via-blue-600 hover:to-blue-500 transition-all">Auto-entrepreneur BTP</Link>
-            <Link to="inscription-appel-offre" className="bg-transparent text-white border border-white px-6 py-3 rounded-button font-medium hover:bg-white hover:text-blue-700 transition-colors">Publier un appel d'offres</Link>
+            <Link to="/inscription-appel-offre" className="bg-transparent text-white border border-white px-6 py-3 rounded-button font-medium hover:bg-white hover:text-blue-700 transition-colors">Publier un appel d'offres</Link>
           </div>
         </div>
       </div>
