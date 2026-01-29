@@ -3,7 +3,12 @@ import { RiBuilding2Line, RiUserLine, RiFileCopyLine, RiMoneyEuroCircleLine } fr
 import contractsApi from '../../../services/contractsApi';
 
 function StatCards({ autoRefreshMs = 30000 }) {
-  const [stats, setStats] = useState([{ label: 'Chantiers en cours', value: 0, icon: <RiBuilding2Line className="text-2xl text-primary" /> }, { label: 'Freelances actifs', value: 0, icon: <RiUserLine className="text-2xl text-green-600" /> }, { label: 'Appels d\'offres', value: 0, icon: <RiFileCopyLine className="text-2xl text-yellow-600" /> }, { label: 'Budget total', value: '\u20ac0', icon: <RiMoneyEuroCircleLine className="text-2xl text-indigo-600" /> }]);
+  const [stats, setStats] = useState([
+    { label: 'Chantiers en cours', value: 0, icon: <RiBuilding2Line className="text-2xl text-primary" /> },
+    { label: 'Freelances actifs', value: 0, icon: <RiUserLine className="text-2xl text-green-600" /> },
+    { label: 'Appels d\'offres', value: 0, icon: <RiFileCopyLine className="text-2xl text-yellow-600" /> },
+    { label: 'Budget total', value: '\u20ac0', icon: <RiMoneyEuroCircleLine className="text-2xl text-indigo-600" /> }
+  ]);
   const [loading, setLoading] = useState(true);
 
   const loadStats = useCallback(async () => { try { const data = await contractsApi.getEnterpriseDashboardStats(); setStats([{ label: 'Chantiers en cours', value: data.chantiersEnCours, icon: <RiBuilding2Line className="text-2xl text-primary" /> }, { label: 'Auto-entrepreneurs actifs', value: data.freelancesActifs, icon: <RiUserLine className="text-2xl text-green-600" /> }, { label: 'Appels d\'offres', value: data.appelsOffres, icon: <RiFileCopyLine className="text-2xl text-yellow-600" /> }, { label: 'Budget total', value: data.budgetTotal, icon: <RiMoneyEuroCircleLine className="text-2xl text-indigo-600" /> }]); } catch (error) { console.error('Erreur:', error); } finally { setLoading(false); } }, []);
