@@ -3,7 +3,7 @@ import api from './api';
 /**
  * Service de suivi des contrats
  */
-const contractTrackingService = {
+export const contractTrackingService = {
   // Obtenir le statut d'un contrat
   getContractStatus: async (contractId) => {
     try {
