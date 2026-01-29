@@ -26,13 +26,9 @@ function StatCards({ autoRefreshMs = 30000 }) {
   useEffect(() => { loadStats(); }, [loadStats]);
   useEffect(() => { if (!autoRefreshMs || autoRefreshMs < 1000) return; const id = setInterval(loadStats, autoRefreshMs); return () => clearInterval(id); }, [autoRefreshMs, loadStats]);
 
-  if (loading) return (<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">{[1,2,3,4].map((i) => (<div key={i} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 animate-pulse"><div className="flex items-center"><div className="w-12 h-12 rounded-lg bg-gray-200"></div><div className="ml-4"><div className="h-4 bg-gray-200 rounded w-24 mb-2"></div><div className="h-6 bg-gray-200 rounded w-16"></div></div></div></div>))}</div>);
+  if (loading) return (<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">{[1,2,3,4].map((index) => (<div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 animate-pulse"><div className="flex items-center"><div className="w-12 h-12 rounded-lg bg-gray-200"></div><div className="ml-4"><div className="h-4 bg-gray-200 rounded w-24 mb-2"></div><div className="h-6 bg-gray-200 rounded w-16"></div></div></div></div>))}</div>);
 
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-      {stats.map((stat, index) => (<div key={index} className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 rounded-lg shadow-sm border border-gray-200 p-6"><div className="flex items-center"><div className={`w-12 h-12 rounded-lg flex items-center justify-center ${stat.bg}`}>{stat.icon}</div><div className="ml-4"><p className="text-sm font-medium text-white">{stat.label}</p><p className="text-2xl font-bold text-white">{stat.value}</p></div></div></div>))}
-    </div>
-  );
+  return (<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">{stats.map((stat, index) => (<div key={index} className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 rounded-lg shadow-sm border border-gray-200 p-6"><div className="flex items-center"><div className={`w-12 h-12 rounded-lg flex items-center justify-center ${stat.bg}`}>{stat.icon}</div><div className="ml-4"><p className="text-sm font-medium text-white">{stat.label}</p><p className="text-2xl font-bold text-white">{stat.value}</p></div></div></div>))}</div>);
 }
 
 export default StatCards;
