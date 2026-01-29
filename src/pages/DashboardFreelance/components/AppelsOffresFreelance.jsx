@@ -1,0 +1,88 @@
+import React, { useState, useEffect } from 'react';
+import { RiSearchLine, RiMapPinLine, RiMoneyDollarCircleLine, RiCalendarLine, RiEyeLine, RiSendPlaneLine, RiFilterLine, RiCloseLine, RiBuilding2Line, RiMapPinRangeLine, RiExternalLinkLine } from 'react-icons/ri';
+import callsForTendersApi from '../../../services/callsForTendersApi';
+import RechercheGeoConnectee from '../../../components/RechercheGeoConnectee';
+
+function AppelsOffresFreelance() {
+  const [callsForTenders, setCallsForTenders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isGeoSearchActive, setIsGeoSearchActive] = useState(false);
+  const [filters, setFilters] = useState({ localisation: '', type_construction: '', budget_min: '', budget_max: '' });
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedCallForTender, setSelectedCallForTender] = useState(null);
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [applicationData, setApplicationData] = useState({ proposition: '', budget_propose: '', duree_proposee: '', lettre_motivation: '' });
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => { loadCallsForTenders(); }, []);
+
+  const loadCallsForTenders = async () => {
+    try { setLoading(true); setIsGeoSearchActive(false); const result = await callsForTendersApi.listCallsForTenders(filters); setCallsForTenders(result.calls_for_tenders || []); }
+    catch (err) { console.error('Erreur lors du chargement des appels d\'offres:', err); setError('Erreur lors du chargement des appels d\'offres'); }
+    finally { setLoading(false); }
+  };
+
+  const handleGeoResults = (results) => { setCallsForTenders(results); setIsGeoSearchActive(true); setShowFilters(false); };
+  const handleResetSearch = () => { setSearchTerm(''); loadCallsForTenders(); };
+  const handleSearch = () => setFilters(prev => ({ ...prev, search: searchTerm }));
+  const applyFilters = () => { setShowFilters(false); loadCallsForTenders(); };
+  const resetFilters = () => { setFilters({ localisation: '', type_construction: '', budget_min: '', budget_max: '' }); setSearchTerm(''); setShowFilters(false); loadCallsForTenders(); };
+  const openApplicationModal = (callForTender) => { setSelectedCallForTender(callForTender); setApplicationData({ proposition: '', budget_propose: '', duree_proposee: '', lettre_motivation: '' }); setShowApplicationModal(true); };
+  const closeApplicationModal = () => { setShowApplicationModal(false); setSelectedCallForTender(null); setApplicationData({ proposition: '', budget_propose: '', duree_proposee: '', lettre_motivation: '' }); };
+
+  const handleApplicationSubmit = async (e) => {
+    e.preventDefault(); if (!selectedCallForTender) return;
+    try { setSubmitting(true); await callsForTendersApi.applyToCallForTender(selectedCallForTender.id, applicationData); alert('Candidature envoyee avec succes !'); closeApplicationModal(); loadCallsForTenders(); }
+    catch (err) { console.error('Erreur candidature:', err); const errorMessage = err?.response?.data?.error || 'Erreur lors de l\'envoi de la candidature.'; alert(errorMessage); }
+    finally { setSubmitting(false); }
+  };
+
+  const formatCurrency = (amount) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount);
+  const getStatusColor = (daysRemaining) => { if (!daysRemaining || daysRemaining <= 0) return 'text-red-600 bg-red-50'; if (daysRemaining <= 7) return 'text-orange-600 bg-orange-50'; return 'text-green-600 bg-green-50'; };
+  const filteredCallsForTenders = callsForTenders.filter(call => (call.titre || '').toLowerCase().includes(searchTerm.toLowerCase()) || (call.description || '').toLowerCase().includes(searchTerm.toLowerCase()) || (call.localisation || '').toLowerCase().includes(searchTerm.toLowerCase()));
+
+  if (loading) return (<div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div><h2 className="text-2xl font-bold text-white">Appels d'Offres</h2><p className="text-white">Decouvrez les derniers appels d'offres publies</p></div>
+        <div className="flex flex-col sm:flex-row gap-3"><div className="relative"><RiSearchLine className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" /><input type="text" placeholder="Rechercher par mot cle..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" /></div><button onClick={() => setShowFilters(!showFilters)} className={`flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gradient-to-r hover:from-blue-400 hover:to-blue-600 text-white ${isGeoSearchActive ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={isGeoSearchActive}><RiFilterLine className="mr-2" />Filtres</button></div>
+      </div>
+      <div className="mb-2"><RechercheGeoConnectee onResultsFound={handleGeoResults} userType="tender" /></div>
+      {isGeoSearchActive && <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow flex justify-between items-center animate-fade-in"><div><p className="font-bold flex items-center gap-2"><RiMapPinRangeLine /> Recherche geographique active</p><p className="text-sm">Les chantiers sont tries du plus proche au plus eloigne.</p></div><button onClick={handleResetSearch} className="text-sm underline text-green-800 hover:text-green-900 font-semibold">Revenir a la liste normale</button></div>}
+      {showFilters && !isGeoSearchActive && <div className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 border border-gray-200 rounded-lg p-4 space-y-4"><div className="grid grid-cols-1 md:grid-cols-4 gap-4"><div><label className="block text-sm font-medium text-white mb-1">Localisation</label><input type="text" placeholder="Ville, region..." value={filters.localisation} onChange={(e) => setFilters(prev => ({ ...prev, localisation: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" /></div><div><label className="block text-sm font-medium text-white mb-1">Type</label><select value={filters.type_construction} onChange={(e) => setFilters(prev => ({ ...prev, type_construction: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"><option value="">Tous types</option><option value="maison">Maison individuelle</option><option value="appartement">Appartement</option><option value="renovation">Renovation</option><option value="commercial">Commercial</option></select></div><div><label className="block text-sm font-medium text-white mb-1">Budget min</label><input type="number" value={filters.budget_min} onChange={(e) => setFilters(prev => ({ ...prev, budget_min: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg" /></div><div><label className="block text-sm font-medium text-white mb-1">Budget max</label><input type="number" value={filters.budget_max} onChange={(e) => setFilters(prev => ({ ...prev, budget_max: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg" /></div></div><div className="flex gap-3"><button onClick={applyFilters} className="px-4 py-2 bg-white text-blue-600 font-bold rounded-lg hover:bg-gray-100">Appliquer les filtres</button><button onClick={resetFilters} className="px-4 py-2 border border-white text-white rounded-lg hover:bg-white/10">Reinitialiser</button></div></div>}
+      <div className="grid gap-6">
+        {error && <div className="bg-red-50 border border-red-200 rounded-lg p-4"><p className="text-red-600">{error}</p><button onClick={loadCallsForTenders} className="mt-2 text-red-600 underline">Reessayer</button></div>}
+        {filteredCallsForTenders.length === 0 && !loading ? (<div className="text-center py-12 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 rounded-lg"><RiBuilding2Line className="mx-auto h-12 w-12 text-gray-400 mb-4" /><h3 className="text-lg font-medium text-white mb-2">Aucun appel d'offre trouve</h3><p className="text-white">Aucun appel d'offre ne correspond a vos criteres de recherche.</p></div>) : (
+          filteredCallsForTenders.map((callForTender) => (
+            <div key={callForTender.id} className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow relative">
+              {isGeoSearchActive && callForTender.distance && <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full font-bold shadow-lg flex items-center gap-1 z-10 animate-pulse"><RiMapPinRangeLine /> {callForTender.distance} km</div>}
+              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                <div className="flex-1">
+                  <div className="flex items-start justify-between mb-3 pr-24"><div><h3 className="text-xl font-semibold text-white mb-1">{callForTender.titre || 'Offre sans titre'}</h3>{callForTender.url_source && <span className="inline-block bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded border border-orange-200 font-bold mb-1">Source Externe</span>}{callForTender.reference && <p className="text-sm text-white opacity-80">Ref: {callForTender.reference}</p>}</div></div>
+                  {callForTender.days_remaining !== null && <div className="mb-3"><span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(callForTender.days_remaining)} bg-opacity-90`}>{callForTender.days_remaining <= 0 ? 'Expire' : `${callForTender.days_remaining} jour(s) restant(s)`}</span></div>}
+                  <p className="text-white mb-4 line-clamp-3">{(callForTender.description || '').replace(/\[SOURCE.*?\]/g, '')}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4"><div className="flex items-center text-sm text-white"><RiMapPinLine className="mr-2 text-white" />{callForTender.localisation || callForTender.ville || 'A definir'}</div><div className="flex items-center text-sm text-white"><RiMoneyDollarCircleLine className="mr-2 text-white" />{formatCurrency(callForTender.budget)}</div>{callForTender.date_limite && <div className="flex items-center text-sm text-white"><RiCalendarLine className="mr-2 text-white" />{new Date(callForTender.date_limite).toLocaleDateString('fr-FR')}</div>}{callForTender.type_construction && <div className="flex items-center text-sm text-white"><RiBuilding2Line className="mr-2 text-white" />{callForTender.type_construction}</div>}</div>
+                  <div className="flex items-center justify-between"><div className="flex items-center text-sm text-white opacity-90"><span>Par {callForTender.company_name}</span>{callForTender.candidatures_count > 0 && <span className="ml-4 bg-white/20 px-2 py-0.5 rounded">{callForTender.candidatures_count} candidature(s)</span>}</div></div>
+                </div>
+                <div className="flex flex-col gap-2 lg:ml-6 mt-4 lg:mt-0"><button onClick={() => alert('Vue detaillee a implementer')} className="flex items-center justify-center px-4 py-2 border border-white/50 rounded-lg hover:bg-white/10 text-white transition"><RiEyeLine className="mr-2" />Voir details</button>{callForTender.url_source ? <a href={callForTender.url_source} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center px-4 py-2 rounded-lg font-bold shadow bg-orange-600 text-white hover:bg-orange-700 hover:scale-105 transition-all"><RiExternalLinkLine className="mr-2" />Postuler sur site</a> : <button onClick={() => openApplicationModal(callForTender)} disabled={callForTender.days_remaining <= 0} className={`flex items-center justify-center px-4 py-2 rounded-lg font-bold shadow ${callForTender.days_remaining <= 0 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600 hover:scale-105 transition-all'}`}><RiSendPlaneLine className="mr-2" />Postuler</button>}</div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+      {showApplicationModal && selectedCallForTender && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto shadow-2xl"><div className="p-6"><div className="flex items-center justify-between mb-6"><h3 className="text-xl font-semibold text-gray-900">Postuler a : {selectedCallForTender.titre}</h3><button onClick={closeApplicationModal} className="text-gray-400 hover:text-red-500 transition"><RiCloseLine size={28} /></button></div>
+            <form onSubmit={handleApplicationSubmit} className="space-y-4"><div><label className="block text-sm font-medium text-gray-700 mb-1">Proposition technique *</label><textarea required rows={4} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" value={applicationData.proposition} onChange={(e) => setApplicationData(prev => ({ ...prev, proposition: e.target.value }))} /></div><div className="grid grid-cols-2 gap-4"><div><label className="block text-sm font-medium text-gray-700 mb-1">Budget (EUR) *</label><input type="number" required className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" value={applicationData.budget_propose} onChange={(e) => setApplicationData(prev => ({ ...prev, budget_propose: e.target.value }))} /></div><div><label className="block text-sm font-medium text-gray-700 mb-1">Duree *</label><input type="text" required placeholder="ex: 2 mois" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" value={applicationData.duree_proposee} onChange={(e) => setApplicationData(prev => ({ ...prev, duree_proposee: e.target.value }))} /></div></div><div><label className="block text-sm font-medium text-gray-700 mb-1">Lettre de motivation</label><textarea rows={3} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" value={applicationData.lettre_motivation} onChange={(e) => setApplicationData(prev => ({ ...prev, lettre_motivation: e.target.value }))} /></div><div className="flex gap-3 pt-4 border-t mt-4"><button type="submit" disabled={submitting} className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">{submitting ? 'Envoi...' : 'Envoyer ma candidature'}</button><button type="button" onClick={closeApplicationModal} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Annuler</button></div></form>
+          </div></div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default AppelsOffresFreelance;
