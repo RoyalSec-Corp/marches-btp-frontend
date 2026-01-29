@@ -1,0 +1,93 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import contractsApi from '../../../services/contractsApi';
+import ContractProgressTracker from '../../../components/ContractProgressTracker';
+import { contractTrackingService } from '../../../services/contractTrackingService';
+
+function ContratsListFreelance() {
+  const navigate = useNavigate();
+  const [contracts, setContracts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [actionLoading, setActionLoading] = useState(null);
+  const [selectedContract, setSelectedContract] = useState(null);
+  const [showTracker, setShowTracker] = useState(false);
+  const [contractMetrics, setContractMetrics] = useState({});
+  const [loadingMetrics, setLoadingMetrics] = useState({});
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleViewDetails = (contract) => navigate('/details-contrat', { state: contract });
+  const handleOpenTracker = (contract) => { setSelectedContract(contract); setShowTracker(true); };
+  const handleCloseTracker = () => { setShowTracker(false); setSelectedContract(null); loadContracts(); };
+
+  useEffect(() => { loadContracts(); let refreshInterval; if (autoRefresh) { refreshInterval = setInterval(() => loadContracts(true), 60000); } return () => { if (refreshInterval) clearInterval(refreshInterval); }; }, [autoRefresh]);
+  useEffect(() => { contracts.forEach(contract => { if (canTrackContract(contract)) loadContractMetrics(contract.id); }); }, [contracts]);
+
+  const loadContracts = async (silent = false) => {
+    try { if (!silent) setLoading(true); setError(''); const data = await contractsApi.listMyContracts(); setContracts(Array.isArray(data) ? data : []); }
+    catch (err) { console.error('Erreur lors du chargement des contrats:', err); setError('Erreur lors du chargement des contrats'); setContracts([]); }
+    finally { if (!silent) setLoading(false); }
+  };
+
+  const loadContractMetrics = async (contractId) => {
+    try { setLoadingMetrics(prev => ({ ...prev, [contractId]: true })); const metrics = await contractTrackingService.getRealTimeMetrics(contractId); setContractMetrics(prev => ({ ...prev, [contractId]: metrics })); }
+    catch (err) { console.error('Erreur chargement metriques contrat', contractId, ':', err); }
+    finally { setLoadingMetrics(prev => ({ ...prev, [contractId]: false })); }
+  };
+
+  const handleContractResponse = async (contractId, response) => {
+    try { setActionLoading(contractId); await contractsApi.respondDirect(contractId, response); const actionText = response === 'accept' ? 'accepte' : 'refuse'; alert(`Contrat ${actionText} avec succes !`); await loadContracts(); }
+    catch (err) { console.error('Erreur lors de la reponse au contrat:', err); const errorMsg = err?.response?.data?.error || err.message || 'Erreur inconnue'; alert(`Erreur: ${errorMsg}`); }
+    finally { setActionLoading(null); }
+  };
+
+  const handleQuickStageUpdate = async (contract, newStage) => {
+    try { await contractTrackingService.updateStageIntelligent(contract.id, newStage, 'freelance', `Mise a jour rapide vers ${newStage}`); await loadContracts(); await loadContractMetrics(contract.id); alert(`Contrat mis a jour vers: ${newStage}`); }
+    catch (err) { console.error('Erreur mise a jour rapide:', err); alert('Erreur lors de la mise a jour'); }
+  };
+
+  const formatBudget = (amount) => { const num = Number(amount || 0); return isNaN(num) ? '—' : `${num.toLocaleString('fr-FR')} EUR`; };
+  const formatDate = (dateString) => { if (!dateString) return '—'; const date = new Date(dateString); if (isNaN(date.getTime())) return '—'; return date.toLocaleDateString('fr-FR'); };
+  const canTrackContract = (contract) => ['accepted', 'assigned', 'signed', 'in_progress', 'deliverable_submitted', 'under_review', 'validated', 'invoiced', 'payment_pending', 'completed'].includes(contract.statut);
+  const getProgressPercentage = (contract) => { const metrics = contractMetrics[contract.id]; if (metrics) return metrics.completion_percentage || 0; const progressMap = { 'accepted': 10, 'signed': 20, 'assigned': 25, 'in_progress': 40, 'deliverable_submitted': 60, 'under_review': 75, 'validated': 85, 'invoiced': 90, 'payment_pending': 95, 'completed': 100 }; return progressMap[contract.statut] || 0; };
+  const getProgressColor = (percentage) => { if (percentage < 30) return 'bg-red-500'; if (percentage < 60) return 'bg-yellow-500'; if (percentage < 90) return 'bg-blue-500'; return 'bg-green-500'; };
+  const getStageIcon = (status) => { const icons = { 'accepted': '🤝', 'signed': '📝', 'assigned': '👤', 'in_progress': '⚡', 'deliverable_submitted': '📤', 'under_review': '🔍', 'validated': '✅', 'invoiced': '💰', 'payment_pending': '⏳', 'completed': '🎉', 'en attente': '⏰' }; return icons[status] || '📄'; };
+  const formatEfficiencyScore = (contractId) => { const metrics = contractMetrics[contractId]; if (!metrics) return '—'; return `${Math.round(metrics.efficiency_score || 0)}%`; };
+  const formatDaysActive = (contractId) => { const metrics = contractMetrics[contractId]; if (!metrics) return '—'; return `${metrics.days_active || 0}j`; };
+  const getQuickActions = (contract) => { const actions = []; switch (contract.statut) { case 'signed': actions.push({ label: 'Demarrer', stage: 'in_progress', color: 'bg-blue-600' }); break; case 'in_progress': actions.push({ label: 'Soumettre livrable', stage: 'deliverable_submitted', color: 'bg-purple-600' }); break; case 'under_review': actions.push({ label: 'Re-soumettre', stage: 'deliverable_submitted', color: 'bg-orange-600' }); break; case 'validated': actions.push({ label: 'Demander facture', stage: 'invoiced', color: 'bg-indigo-600' }); break; } return actions; };
+
+  const filteredContracts = contracts.filter(contract => contract.title?.toLowerCase().includes(searchTerm.toLowerCase()) || contract.description?.toLowerCase().includes(searchTerm.toLowerCase()) || contract.company_name?.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  if (loading) return (<div className="space-y-6"><div className="bg-gradient-to-br from-blue-400 via-blue-500 to-blue-400 rounded-lg shadow-sm border border-gray-200 p-6"><div className="text-center py-8"><p className="text-white">Chargement de vos contrats...</p></div></div></div>);
+  if (showTracker && selectedContract) return (<div className="space-y-6"><div className="bg-gradient-to-br from-blue-400 via-blue-500 to-blue-400 rounded-xl p-6 shadow-sm border"><div className="flex items-center justify-between mb-6"><h2 className="text-xl font-semibold text-white">Suivi du contrat: {selectedContract.title}</h2><button onClick={handleCloseTracker} className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 flex items-center gap-2">← Retour a la liste</button></div></div><ContractProgressTracker contractId={selectedContract.id} userType="freelance" onStageUpdate={handleCloseTracker} /></div>);
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-blue-600 rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-4"><h2 className="text-xl font-bold text-white">Mes contrats</h2><button onClick={() => setAutoRefresh(!autoRefresh)} className={`flex items-center gap-2 px-3 py-1 rounded-lg text-sm ${autoRefresh ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-gray-100 text-gray-600 border border-gray-200'}`}><span className={autoRefresh ? 'animate-pulse' : ''}>{autoRefresh ? '🔄' : '⏸️'}</span>Auto-refresh</button><div className="text-sm text-white">{contracts.length} contrat{contracts.length !== 1 ? 's' : ''}</div></div>
+          <div className="flex items-center gap-3"><button onClick={() => loadContracts()} disabled={loading} className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"><span className={loading ? 'animate-spin' : ''}>🔄</span>Actualiser</button><input type="text" placeholder="Rechercher un contrat..." className="form-input w-64 text-sm" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} /></div>
+        </div>
+        {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg"><p className="text-red-600 text-sm">{error}</p></div>}
+        {filteredContracts.length === 0 ? (<div className="text-center py-8"><p className="text-gray-500 mb-2">{contracts.length === 0 ? 'Aucun contrat trouve' : 'Aucun contrat ne correspond a votre recherche'}</p>{contracts.length === 0 && <p className="text-sm text-gray-400">Vos contrats apparaitront ici une fois qu'une entreprise vous aura selectionne pour une mission.</p>}</div>) : (
+          <div className="space-y-4">
+            {filteredContracts.map((contract) => (
+              <div key={contract.id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex-1"><h3 className="text-lg font-semibold text-white mb-1 flex items-center gap-2">{getStageIcon(contract.statut)} {contract.title || 'Mission sans titre'}</h3><div className="flex items-center gap-2 mb-2"><span className={`text-sm font-medium px-2 py-1 rounded-full ${contract.status_display === 'En attente' ? 'bg-yellow-100 text-yellow-800' : contract.status_display === 'Accepte' ? 'bg-blue-100 text-blue-800' : contract.status_display === 'En cours' ? 'bg-green-100 text-green-800' : contract.status_display === 'Termine' ? 'bg-gray-100 text-gray-800' : 'bg-red-100 text-red-800'}`}>{contract.status_display}</span><span className="text-sm text-white">- Contrat #{contract.id}</span></div>{canTrackContract(contract) && <div className="flex items-center gap-2 mt-2 mb-3"><div className="flex-1 bg-gray-200 rounded-full h-2"><div className={`h-2 rounded-full transition-all duration-500 ${getProgressColor(getProgressPercentage(contract))}`} style={{ width: `${getProgressPercentage(contract)}%` }}></div></div><span className="text-xs font-medium text-white min-w-[35px]">{getProgressPercentage(contract)}%</span></div>}</div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-white mb-3"><div><span className="font-medium">Client :</span> {contract.company_name}{contract.company_location && <div className="text-xs text-white mt-1">📍 {contract.company_location}</div>}</div><div><span className="font-medium">Montant :</span> {formatBudget(contract.budget)}{canTrackContract(contract) && <div className="mt-1 space-y-1">{loadingMetrics[contract.id] ? <div className="text-xs text-gray-400">⏳ Chargement...</div> : <><div className="text-xs text-blue-600">📊 Efficacite: {formatEfficiencyScore(contract.id)}</div><div className="text-xs text-green-600">⏰ Actif: {formatDaysActive(contract.id)}</div></>}</div>}</div><div><span className="font-medium">Duree :</span> {contract.duration && contract.duration_unit ? `${contract.duration} ${contract.duration_unit}` : (contract.type_tarif === 'horaire' ? 'Horaire' : contract.type_tarif === 'journalier' ? 'Journalier' : contract.duration || '—')}</div><div><span className="font-medium">{contract.status_display === 'Termine' ? 'Cloture le' : 'Debut prevu'}:</span> {contract.status_display === 'Termine' ? formatDate(contract.updated_at) : formatDate(contract.start_date) || 'A convenir'}</div></div>
+                {contract.description && <div className="mb-3"><span className="font-medium text-sm text-white">Description :</span><p className="text-sm text-white mt-1">{contract.description}</p></div>}
+                {canTrackContract(contract) && getQuickActions(contract).length > 0 && <div className="mb-3"><div className="text-sm font-medium text-gray-700 mb-2">Actions rapides :</div><div className="flex flex-wrap gap-2">{getQuickActions(contract).map((action, index) => <button key={index} onClick={() => handleQuickStageUpdate(contract, action.stage)} className={`text-xs px-2 py-1 rounded text-white hover:opacity-80 transition-opacity ${action.color}`} title={`Changer vers: ${action.stage}`}>{action.label}</button>)}</div></div>}
+                <div className="flex justify-between items-center"><div className="text-xs text-white">Cree le {formatDate(contract.created_at)}</div><div className="flex gap-2 flex-wrap">{contract.status_display === 'En attente' && <div className="flex gap-2"><button onClick={() => handleContractResponse(contract.id, 'accept')} disabled={actionLoading === contract.id} className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">{actionLoading === contract.id ? 'En cours...' : 'Accepter'}</button><button onClick={() => handleContractResponse(contract.id, 'reject')} disabled={actionLoading === contract.id} className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed">{actionLoading === contract.id ? 'En cours...' : 'Refuser'}</button></div>}<button onClick={() => handleViewDetails(contract)} className="px-3 py-1 bg-primary text-white rounded text-sm hover:bg-blue-700">Details</button>{(contract.statut === 'accepted' || contract.statut === 'assigned') && <button onClick={() => navigate(`/signer-contrat/${contract.id}`)} className="px-3 py-1 bg-orange-600 text-white rounded text-sm hover:bg-orange-700 flex items-center gap-1 font-semibold">✍️ Signer contrat</button>}{canTrackContract(contract) && <button onClick={() => handleOpenTracker(contract)} className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 flex items-center gap-1">📊 Suivi</button>}</div></div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default ContratsListFreelance;
