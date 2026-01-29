@@ -1,0 +1,206 @@
+.contract-signature,
+.contract-signature-simple {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.signature-header {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.signature-header h3 {
+  margin: 0 0 8px 0;
+  color: #1f2937;
+  font-size: 20px;
+}
+
+.contract-title {
+  color: #6b7280;
+  margin: 0;
+  font-size: 14px;
+}
+
+.signature-summary,
+.signature-details {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-item,
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.summary-item:last-child,
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.summary-item .label,
+.detail-row span {
+  color: #6b7280;
+}
+
+.summary-item .value,
+.detail-row strong {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.signature-form .form-group {
+  margin-bottom: 20px;
+}
+
+.signature-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.signature-form input[type="text"] {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.signature-form input[type="text"]:focus {
+  outline: none;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+.signature-input {
+  font-family: 'Brush Script MT', cursive;
+  font-size: 24px !important;
+}
+
+.checkbox-group {
+  background: #fffbeb;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #fcd34d;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin-top: 4px;
+  width: 18px;
+  height: 18px;
+  accent-color: #f59e0b;
+}
+
+.checkbox-label span {
+  font-size: 14px;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.signature-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.signature-actions .btn {
+  flex: 1;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.signature-actions .btn-secondary {
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.signature-actions .btn-secondary:hover {
+  background: #f3f4f6;
+}
+
+.signature-actions .btn-primary {
+  background: #f59e0b;
+  border: none;
+  color: white;
+}
+
+.signature-actions .btn-primary:hover:not(:disabled) {
+  background: #d97706;
+}
+
+.signature-actions .btn-primary:disabled {
+  background: #fcd34d;
+  cursor: not-allowed;
+}
+
+/* Signature type selector */
+.signature-type-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.type-btn {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.type-btn.active {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
+}
+
+/* Canvas signature */
+.signature-canvas {
+  width: 100%;
+  height: 150px;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  background: #fafafa;
+  cursor: crosshair;
+}
+
+.btn-clear {
+  margin-top: 8px;
+  padding: 6px 12px;
+  background: none;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  color: #6b7280;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn-clear:hover {
+  background: #f3f4f6;
+}

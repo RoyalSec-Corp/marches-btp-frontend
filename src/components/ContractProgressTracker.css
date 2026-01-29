@@ -1,0 +1,194 @@
+.contract-progress-tracker {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.progress-header h4 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 16px;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-cancelled {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.status-dispute {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.progress-steps {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.step-indicator {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: center;
+}
+
+.step-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  background: #f3f4f6;
+  border: 2px solid #e5e7eb;
+  position: relative;
+  z-index: 2;
+  transition: all 0.3s;
+}
+
+.step-line {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: #e5e7eb;
+  z-index: 1;
+}
+
+.step-content {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.step-label {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.step-current-badge {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 8px;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* States */
+.step-completed .step-icon {
+  background: #d1fae5;
+  border-color: #10b981;
+}
+
+.step-completed .step-line {
+  background: #10b981;
+}
+
+.step-completed .step-label {
+  color: #059669;
+}
+
+.step-current .step-icon {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
+}
+
+.step-current .step-label {
+  color: #d97706;
+  font-weight: 600;
+}
+
+.step-error .step-icon {
+  background: #fee2e2;
+  border-color: #ef4444;
+}
+
+.step-error .step-label {
+  color: #dc2626;
+}
+
+.step-pending .step-icon {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+.step-pending .step-label {
+  color: #9ca3af;
+}
+
+.progress-details {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.progress-note {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .progress-steps {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .progress-step {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .step-indicator {
+    width: auto;
+    flex-direction: column;
+  }
+
+  .step-line {
+    width: 2px;
+    height: 100%;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .step-content {
+    margin-top: 0;
+    margin-left: 12px;
+    text-align: left;
+  }
+}
