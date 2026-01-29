@@ -63,8 +63,11 @@ const SectionFreelances = () => {
     <div className="px-6 py-8">
       <h1 className="text-3xl font-bold text-white mb-1">Auto-entrepreneurs BTP</h1>
       <p className="text-white mb-6">Trouvez les meilleurs professionnels independants pour vos projets de construction</p>
+
       <div className="mb-6"><RechercheGeoConnectee onResultsFound={handleGeoResults} userType="freelance" /></div>
-      {isGeoSearchActive && (<div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded shadow flex justify-between items-center"><div><p className="font-bold">Recherche geographique active</p><p className="text-sm">Resultats tries par proximite.</p></div><button onClick={handleResetSearch} className="text-sm underline text-green-800 hover:text-green-900 font-semibold">Revenir aux filtres classiques</button></div>)}
+
+      {isGeoSearchActive && (<div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded shadow flex justify-between items-center"><div><p className="font-bold">\ud83d\udccd Recherche geographique active</p><p className="text-sm">Resultats tries par proximite.</p></div><button onClick={handleResetSearch} className="text-sm underline text-green-800 hover:text-green-900 font-semibold">Revenir aux filtres classiques</button></div>)}
+
       <div className={`bg-gradient-to-r from-blue-500 via-blue-600 rounded-xl shadow-sm border border-gray-100 mb-8 transition-opacity ${isGeoSearchActive ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
         <div className="p-6 border-b border-gray-100">
           <h3 className="text-lg font-semibold text-white mb-4">Filtres de Recherche Classiques</h3>
@@ -76,6 +79,7 @@ const SectionFreelances = () => {
           </div>
         </div>
       </div>
+
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-white">{filteredFreelances.length} freelances trouves</p>
         <div className="flex items-center gap-4">
@@ -85,8 +89,10 @@ const SectionFreelances = () => {
           <RiListUnordered className={`cursor-pointer ${viewMode === 'list' ? 'text-orange-400' : 'text-white'}`} onClick={() => setViewMode('list')} size={24} />
         </div>
       </div>
+
       {loading && (<div className="flex justify-center items-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div><span className="ml-2 text-white">Chargement...</span></div>)}
       {error && (<div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center mb-6"><p className="text-red-600">{error}</p><button onClick={loadFreelances} className="mt-2 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">Reessayer</button></div>)}
+
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredFreelances.length === 0 && !loading && (<div className="col-span-full text-center py-8"><p className="text-white">Aucun freelance trouve</p></div>)}
@@ -95,7 +101,7 @@ const SectionFreelances = () => {
               {isGeoSearchActive && freelance.distance && (<div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow flex items-center gap-1"><RiMapPinRangeLine /> {freelance.distance} km</div>)}
               <div className="flex items-center space-x-4 mb-4">
                 <div className="relative"><img src={freelance.avatar_url || freelance.img || "/api/placeholder/40/40"} alt={freelance.nom} className="w-16 h-16 rounded-full object-cover filter hue-rotate-0 saturate-200 border-2 border-orange-500" onError={(e) => { e.target.src = "https://via.placeholder.com/150"; }} /><div className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${freelance.is_active ? 'bg-green-500' : 'bg-red-500'}`}></div></div>
-                <div><h3 className="text-xl font-bold text-white">{freelance.nom} {freelance.prenom}</h3><p className="text-sm text-white opacity-90">{freelance.secteur || freelance.specialite || 'Professionnel BTP'}</p><div className="flex items-center gap-1 text-yellow-400 text-sm mt-1"><RiStarFill /><span>{freelance.note || 4.5}</span><span className="text-white ml-2 opacity-80">- {freelance.experience || 0} exp.</span></div></div>
+                <div><h3 className="text-xl font-bold text-white">{freelance.nom} {freelance.prenom}</h3><p className="text-sm text-white opacity-90">{freelance.secteur || freelance.specialite || 'Professionnel BTP'}</p><div className="flex items-center gap-1 text-yellow-400 text-sm mt-1"><RiStarFill /><span>{freelance.note || 4.5}</span><span className="text-white ml-2 opacity-80">\u2022 {freelance.experience || 0} exp.</span></div></div>
               </div>
               <div className="mb-4 bg-white/10 p-3 rounded-lg"><div className="flex justify-between items-center mb-1"><span className="text-sm font-medium text-white opacity-80">Tarif journalier</span><span className="text-lg font-bold text-white">{freelance.daily_rate || freelance.tarif || 'N/A'}\u20ac</span></div><div className="flex justify-between items-center"><span className="text-sm font-medium text-white opacity-80">Ville</span><span className="text-sm font-medium text-white">{freelance.ville}</span></div></div>
               <button className="w-full bg-gradient-to-r from-orange-400 to-orange-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:from-orange-500 hover:to-orange-700 transition-all shadow-sm flex justify-center items-center gap-2" onClick={() => { setSelectedFreelance(freelance); setIsModalOpen(true); }}>Voir le profil</button>
